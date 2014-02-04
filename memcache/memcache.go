@@ -118,6 +118,14 @@ func New(server ...string) *Client {
 	return NewFromSelector(ss)
 }
 
+// New returns a memcache client using the provided server(s)
+// with equal weight. If a server is listed multiple times,
+// it gets a proportional amount of weight.
+func NewClient(servers []string) *Client {
+        ss := new(ServerList)
+        ss.SetServerList(servers)
+        return NewFromSelector(ss)
+}
 // NewFromSelector returns a new Client using the provided ServerSelector.
 func NewFromSelector(ss ServerSelector) *Client {
 	return &Client{selector: ss}

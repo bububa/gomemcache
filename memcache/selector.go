@@ -72,6 +72,30 @@ func (ss *ServerList) SetServers(servers ...string) error {
 	return nil
 }
 
+func (ss *ServerList) SetServerList(servers []string) error {
+        naddr := make([]net.Addr, len(servers))
+        for i, server := range servers {
+                if strings.Contains(server, "/") {
+                        addr, err := net.ResolveUnixAddr("unix", server)
+                        if err != nil {
+                                return err
+                        }
+                        naddr[i] = addr
+                } else {
+                        tcpaddr, err := net.ResolveTCPAddr("tcp", server)
+                        if err != nil {
+                                return err
+                        }
+                        naddr[i] = tcpaddr
+                }
+        }
+
+        ss.lk.Lock()
+        defer ss.lk.Unlock()
+        ss.addrs = naddr
+        return nil
+}
+
 func (ss *ServerList) PickServer(key string) (net.Addr, error) {
 	ss.lk.RLock()
 	defer ss.lk.RUnlock()
